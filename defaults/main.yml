@@ -1,0 +1,38 @@
+---
+# defaults file for ansible-role-apache
+
+site:
+  app: site
+  host: localhost.vagrant
+  user: administrator
+  password: whichever
+  docroot: "/var/www/site/current/public"
+
+ansible_role_apache:
+  packages:
+  - apache2
+  - software-properties-common
+  - python-software-properties
+  - libcache-perl
+  - libcache-cache-perl
+  - python-passlib
+  - libapache2-mod-php5
+
+  modules:
+  - rewrite
+  - expires
+  - headers
+  - ssl
+
+  app: "{{ site.app }}"
+  hostname: "{{ site.host }}"
+  hostnames:
+  - "{{ site.host }}"
+  docroot: "{{ site.docroot }}"
+  user: "{{ site.user }}"
+  password: "{{ site.app }}"
+
+  pagespeed:
+  - enabled: yes
+  - dir_tmp: "/tmp"
+  - url: "https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-stable_current_amd64.deb"

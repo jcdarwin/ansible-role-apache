@@ -1,0 +1,97 @@
+---
+# ===============================================================
+# configure: configure apache
+# ===============================================================
+
+- include_vars: "defaults/main.yml"
+
+- name: Configure the virtual host with our environment
+  action: template
+    src=templates/apache.conf.j2
+    dest=/etc/apache2/sites-available/{{ item }}.conf
+    mode=0644
+  with_items: "{{ ansible_role_apache.hostnames }}"
+  tags: configure
+
+- name: Create our htpasswd file
+  htpasswd: path=/etc/apache2/{{ ansible_role_apache.app }}-users name={{ ansible_role_apache.user }} password={{ ansible_role_apache.password }} owner=root group=www-data mode=0640
+  tags: configure
+
+- name: Activate apache modules
+  command: a2enmod {{ item }}
+  with_items: "{{ ansible_role_apache.modules }}"
+  tags: configure
+
+- name: Unlink default site
+  file:
+    path={{ item }}
+    state=absent
+  with_items:
+    - /etc/apache2/sites-enabled/default
+    - /etc/apache2/sites-enabled/default-ssl
+    - /etc/apache2/sites-enabled/000-default.conf
+  tags: configure
+
+- name: Ensure our site directory exists
+  file: path=/var/www/{{ ansible_role_apache.app }} state=directory
+  tags: configure
+
+- name: Ensure our log directory exists
+  file: path=/var/log/apache2/{{ item }} state=directory
+  with_items: "{{ ansible_role_apache.hostnames }}"
+  tags: configure
+
+- name: remove the original log rotate globs for apache
+  lineinfile: dest=/etc/logrotate.d/apache2
+              regexp='^/var/log/apache2/*.log {'
+              insertbefore=BOF
+              state=absent
+  tags: configure
+
+- name: Add our log rotate globs for apache
+  lineinfile: dest=/etc/logrotate.d/apache2
+              regexp='^/var/log/apache2/*.log /var/log/apache2/*/*.log {'
+              line='/var/log/apache2/*.log /var/log/apache2/*/*.log {'
+              insertbefore=BOF
+              state=present
+  tags: configure
+
+- name: Activate our virtualhost conf
+  action: command a2ensite {{ item }}.conf
+  with_items: "{{ ansible_role_apache.hostnames }}"
+  tags: configure
+
+- name: Check that our virtualhost conf is valid
+  action: command apache2ctl configtest
+  register: result
+  ignore_errors: True
+  tags: configure
+
+- name: Rolling back - Removing our virtualhost
+  action: command a2dissite {{ item }}.conf
+  with_items: "{{ ansible_role_apache.hostnames }}"
+  when: result|failed
+  tags: configure
+
+- name: Rolling back - Ending playbook
+  action: fail msg="Configuration file is not valid. Please check that before re-running the playbook."
+  when: result|failed
+  tags: configure
+
+- name: Create fqdn configuration file (prevent apache error message 'Could not reliably determine the server's fully qualified domain name ...')
+  copy:
+    dest="/etc/apache2/conf-available/{{ item }}.conf"
+    content="ServerName localhost"
+  with_items: "{{ ansible_role_apache.hostnames }}"
+  tags: configure
+
+- name: Activate our conf
+  action: command a2enconf {{ item }}.conf
+  with_items: "{{ ansible_role_apache.hostnames }}"
+  tags: configure
+
+- name: Make sure Apache is up and running
+  service:
+    name=apache2
+    state=restarted
+  tags: configure

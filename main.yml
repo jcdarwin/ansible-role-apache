@@ -1,0 +1,16 @@
+---
+# This Playbook deploys apache!
+
+- hosts: all
+  remote_user: root
+  become: true
+  become_user: root
+  tags: apache
+
+  handlers:
+  - include: handlers/main.yml
+
+  tasks:
+  - include: tasks/apache_packages.yml
+  - include: tasks/apache_configure.yml
+  - include: tasks/apache_pagespeed.yml

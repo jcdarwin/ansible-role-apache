@@ -1,0 +1,81 @@
+---
+
+- include_vars: "defaults/main.yml"
+
+- name: pagespeed | Create temporary directory
+  shell: mktemp -d
+  register: tempdir
+  tags: pagespeed
+
+- name: pagespeed | Download pagespeed
+  get_url:
+    url="{{ ansible_role_apache.pagespeed.url }}"
+    dest="{{ ansible_role_apache.pagespeed.dir_tmp }}/"
+  register: pagespeed_download
+  tags: pagespeed
+
+- name: pagespeed | Add package
+  apt: deb={{ ansible_role_apache.pagespeed.dir_tmp }}/{{ ansible_role_apache.pagespeed.package_deb }}
+  when: pagespeed_download.changed
+  tags: pagespeed
+
+- name: pagespeed | Install package
+  action: command apt-get -f install
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  tags: pagespeed
+
+- name: Update pagespeed config
+  lineinfile:
+    dest=/etc/apache2/mods-available/pagespeed.conf
+    regexp="    {{ '#' }} Turn on mod_pagespeed"
+    insertafter="ModPagespeed on"
+    line="    {{ '# ' }} Support X-Forwarded-Proto header.\n    ModPagespeedRespectXForwardedProto on\n\n    Turn on mod_pagespeed. To completely disable mod_pagespeed, you"
+    state=present
+  tags: pagespeed
+
+- name: Create our htpasswd file
+  htpasswd: path=/etc/apache2/{{ ansible_role_apache.app }}-users name={{ ansible_role_apache.user }} password={{ ansible_role_apache.password }} owner=root group=www-data mode=0640
+  tags: pagespeed
+
+- name: Ensure our log directory exists
+  file:
+    path=/var/log/apache2/pagespeed.{{ ansible_role_apache.hostname }}
+    state=directory
+  tags: pagespeed
+
+- name: Create our apache pagespeed conf
+  template:
+    src: templates/pagespeed.conf.j2
+    dest: /etc/apache2/sites-available/pagespeed.{{ ansible_role_apache.hostname }}.conf
+  tags: pagespeed
+
+- name: Activate our conf
+  action: command a2ensite pagespeed.{{ ansible_role_apache.hostname }}.conf
+  tags: pagespeed
+
+- name: Check that our virtualhost conf is valid
+  action: command apache2ctl configtest
+  register: result
+  ignore_errors: True
+  tags: pagespeed
+
+- name: Rolling back - Removing our virtualhost
+  action: command a2dissite pagespeed.{{ ansible_role_apache.hostname }}.conf
+  when: result|failed
+  tags: pagespeed
+
+- name: Rolling back - Ending playbook
+  action: fail msg="Pagespeed configuration file is not valid. Please check that before re-running the playbook."
+  when: result|failed
+  tags: pagespeed
+
+- name: Make sure Apache is up and running
+  service:
+    name=apache2
+    state=restarted
+  tags: apache
+- name: Activate our conf
+  action: command a2ensite pagespeed.{{ ansible_role_apache.hostname }}.conf
+  tags: pagespeed
+
+- debug: msg=" pagespeed | See statisctics at http://localhost/pagespeed_admin"
