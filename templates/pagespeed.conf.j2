@@ -1,0 +1,35 @@
+<VirtualHost *:80>
+    # Permanently redirect http://pagespeed.{{ ansible_role_apache.hostname }} to https://pagespeed.{{ ansible_role_apache.hostname }}
+    ServerName pagespeed.{{ ansible_role_apache.hostname }}
+    Redirect 301 / http://pagespeed.{{ ansible_role_apache.hostname }}/
+</VirtualHost>
+
+<VirtualHost *:80>
+    ServerName pagespeed.{{ ansible_role_apache.hostname }}
+
+    DocumentRoot "/var/www/"
+
+    ErrorLog  /var/log/apache2/pagespeed.{{ ansible_role_apache.hostname }}/error.log
+    CustomLog /var/log/apache2/pagespeed.{{ ansible_role_apache.hostname }}/access.log combined
+
+    SSLEngine On
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    <Directory "/var/www">
+        AllowOverride All
+        Options -Indexes
+    </Directory>
+
+    <LocationMatch "(?i)^(?!/search/)[^\.]+$">
+        AuthType Basic
+        AuthName "{{ ansible_role_apache.hostname }}"
+        AuthUserFile /etc/apache2/{{ ansible_role_apache.app }}-users
+        Require valid-user
+
+        Order Deny,Allow
+        Deny from all
+        Satisfy any
+    </LocationMatch>
+
+</VirtualHost>

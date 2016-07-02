@@ -15,7 +15,7 @@
   tags: pagespeed
 
 - name: pagespeed | Add package
-  apt: deb={{ ansible_role_apache.pagespeed.dir_tmp }}/{{ ansible_role_apache.pagespeed.package_deb }}
+  command: dpkg -i /tmp/mod-pagespeed-*.deb
   when: pagespeed_download.changed
   tags: pagespeed
 
@@ -29,7 +29,7 @@
     dest=/etc/apache2/mods-available/pagespeed.conf
     regexp="    {{ '#' }} Turn on mod_pagespeed"
     insertafter="ModPagespeed on"
-    line="    {{ '# ' }} Support X-Forwarded-Proto header.\n    ModPagespeedRespectXForwardedProto on\n\n    Turn on mod_pagespeed. To completely disable mod_pagespeed, you"
+    line="    {{ '# ' }} Support X-Forwarded-Proto header.\n    ModPagespeedRespectXForwardedProto on\n\n    {{ '# ' }} Turn on mod_pagespeed. To completely disable mod_pagespeed, you"
     state=present
   tags: pagespeed
 
