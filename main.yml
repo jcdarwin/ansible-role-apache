@@ -11,6 +11,6 @@
   - include: handlers/main.yml
 
   tasks:
-#  - include: tasks/apache_packages.yml
-#  - include: tasks/apache_configure.yml
+  - include: tasks/apache_packages.yml
+  - include: tasks/apache_configure.yml
   - include: tasks/apache_pagespeed.yml

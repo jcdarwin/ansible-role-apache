@@ -21,7 +21,11 @@
 
 - name: pagespeed | Install package
   action: command apt-get -f install
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  tags: pagespeed
+
+- name: Activate our pagespeed mod
+  action: command a2enmod pagespeed
+  when: ansible_role_apache.pagespeed.enabled
   tags: pagespeed
 
 - name: Update pagespeed config
@@ -51,6 +55,7 @@
 
 - name: Activate our conf
   action: command a2ensite pagespeed.{{ ansible_role_apache.hostname }}.conf
+  when: ansible_role_apache.pagespeed.enabled
   tags: pagespeed
 
 - name: Check that our virtualhost conf is valid
