@@ -5,18 +5,19 @@ site:
   app: site
   host: localhost.vagrant
   user: administrator
-  password: whichever
+  password: whatever
   docroot: "/var/www/site/current/public"
 
 ansible_role_apache:
   packages:
   - apache2
+  - apache2-utils
   - software-properties-common
   - python-software-properties
   - libcache-perl
   - libcache-cache-perl
   - python-passlib
-  - libapache2-mod-php5
+  - libapache2-mod-php
 
   modules:
   - rewrite

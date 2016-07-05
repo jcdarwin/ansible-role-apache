@@ -1,6 +1,7 @@
 ---
 
 - include_vars: "defaults/main.yml"
+  tags: pagespeed
 
 - name: pagespeed | Create temporary directory
   shell: mktemp -d
@@ -11,12 +12,12 @@
   get_url:
     url="{{ ansible_role_apache.pagespeed.url }}"
     dest="{{ ansible_role_apache.pagespeed.dir_tmp }}/"
-  register: pagespeed_download
+#  register: pagespeed_download
   tags: pagespeed
 
 - name: pagespeed | Add package
   command: dpkg -i /tmp/mod-pagespeed-*.deb
-  when: pagespeed_download.changed
+#  when: pagespeed_download.changed
   tags: pagespeed
 
 - name: pagespeed | Install package
@@ -38,7 +39,13 @@
   tags: pagespeed
 
 - name: Create our htpasswd file
-  htpasswd: path=/etc/apache2/{{ ansible_role_apache.app }}-users name={{ ansible_role_apache.user }} password={{ ansible_role_apache.password }} owner=root group=www-data mode=0640
+  htpasswd:
+    path=/etc/apache2/{{ ansible_role_apache.app }}-users
+    name={{ ansible_role_apache.user }}
+    password={{ ansible_role_apache.password }}
+    owner=root
+    group=www-data
+    mode=0640
   tags: pagespeed
 
 - name: Ensure our log directory exists
@@ -83,4 +90,4 @@
   action: command a2ensite pagespeed.{{ ansible_role_apache.hostname }}.conf
   tags: pagespeed
 
-- debug: msg=" pagespeed | See statisctics at http://localhost/pagespeed_admin"
+- debug: msg=" pagespeed | See statistics at http://localhost/pagespeed_admin"

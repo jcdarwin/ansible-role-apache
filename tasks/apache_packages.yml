@@ -11,3 +11,7 @@
     state=installed
   with_items: "{{ ansible_role_apache.packages }}"
   tags: packages
+
+- name: Ensure the PHP ppa is present
+  apt_repository: repo='ppa:ondrej/apache2'
+  tags: packages
