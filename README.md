@@ -74,6 +74,13 @@ Running the playbook:
     # Check that php has been installed
     ansible -m shell -a 'php -v' all -i ../vagrant/ansible/hosts
 
+To see the something in the browser (presuming you're using the defaults and have installed the `ansible-role-php` role):
+
+	# Add the subdomain to our hosts file
+	echo "127.0.0.1	localhost.vagrant"
+
+	# then visit: http://localhost.vagrant/info.php
+
 License
 -------
 
