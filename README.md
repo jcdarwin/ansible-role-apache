@@ -44,17 +44,7 @@ You may already have:
 Role Variables
 --------------
 
-Available variables are listed below, along with default values as found in `defaults/main.yml`:
-
-    ansible_role_php:
-      packages:
-      - php5
-      - php5-curl
-      - php5-mcrypt
-      - php5-gd
-      - php5-mysql
-      - php5-cli
-      - php5-imagick
+Available variables are as found in `defaults/main.yml`
 
 Dependencies
 ------------
@@ -78,8 +68,8 @@ Running the playbook:
 
     ansible-playbook -l all main.yml -i ../vagrant/ansible/hosts
 
-    # Check that php has been installed
-    ansible -m shell -a 'php -v' all -i ../vagrant/ansible/hosts
+    # Check that apache config syntax is ok
+    ansible -m shell -a 'apache2ctl -t' all -i ../vagrant/ansible/hosts
 
 To see the something in the browser (presuming you're using the defaults and have installed the `ansible-role-php` role):
 

@@ -34,7 +34,7 @@ ansible_role_apache:
   password: "{{ site.app }}"
 
   pagespeed:
-    enabled: yes
+    enabled: true
     dir_tmp: "/tmp"
     package_deb: "mod-pagespeed-stable_current_amd64.deb"
     url: "https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-stable_current_amd64.deb"

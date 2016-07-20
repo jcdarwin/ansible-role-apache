@@ -22,12 +22,14 @@
     ErrorLog  /var/log/apache2/{{ item }}/error.log
     CustomLog /var/log/apache2/{{ item }}/access.log combined
 
+{% if ansible_role_apache.pagespeed.enabled  %}
     <IfModule pagespeed_module>
         ModPagespeed on
         ModPagespeedDisableFilters inline_images,trim_urls,rewrite_style_attributes_with_url,convert_meta_tags,
         ModPagespeedEnableFilters extend_cache,rewrite_images,resize_images,recompress_images,remove_comments,collapse_whitespace,outline_javascript,remove_quotes,make_google_analytics_async,combine_javascript,inline_css,resize_mobile_images,pedantic,
         ModPagespeedLoadFromFile "http://{{ item }}/assets/" "{{ ansible_role_apache.docroot }}/assets/"
     </IfModule>
+{% endif %}
 </VirtualHost>
 
 <VirtualHost *:443>
