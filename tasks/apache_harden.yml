@@ -1,0 +1,46 @@
+# ===============================================================
+# harden: apply extra confs to harden apache
+# use https://www.ssllabs.com/ssltest/index.html to check the results
+# ===============================================================
+
+- name: Configure Apache with our extra confs
+	action: template
+		src=templates/{{ item }}.conf.j2
+		dest=/etc/apache2/conf-available/{{ item }}.conf
+		mode=0644
+	with_items: confs
+	sudo: yes
+	tags: harden
+
+- name: Activate our conf
+	action: command a2enconf {{ item }}.conf
+	with_items: confs
+	sudo: yes
+	tags: harden
+
+- name: Check that our conf is valid
+	action: command apache2ctl configtest
+	register: result
+	ignore_errors: True
+	sudo: yes
+	tags: harden
+
+- name: Rolling back - Removing our conf
+	action: command a2disconf {{ item }}.conf
+	with_items: confs
+	when: result|failed
+	sudo: yes
+	tags: harden
+
+- name: Rolling back - Ending playbook
+	action: fail msg="Configuration file is not valid. Please check that before re-running the playbook."
+	when: result|failed
+	sudo: yes
+	tags: harden
+
+- name: Make sure Apache is restarted
+	service:
+		name=apache2
+		state=restarted
+	sudo: yes
+	tags: harden
