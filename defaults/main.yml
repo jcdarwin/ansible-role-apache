@@ -18,6 +18,7 @@ ansible_role_apache:
   - libcache-cache-perl
   - python-passlib
   - libapache2-mod-php
+  - libwww-perl
 
   modules:
   - rewrite
