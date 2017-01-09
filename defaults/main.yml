@@ -19,6 +19,7 @@ ansible_role_apache:
   - python-passlib
   - libapache2-mod-php
   - libwww-perl
+  - ssl-cert
 
   modules:
   - rewrite
