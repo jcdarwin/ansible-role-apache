@@ -13,12 +13,12 @@ ansible_role_apache:
   - apache2
   - apache2-utils
   - software-properties-common
-  - python-software-properties
+  - python3-software-properties
   - libcache-perl
   - libcache-cache-perl
-  - python-passlib
+  - python3-passlib
   - libapache2-mod-php
-  - libwww-perl
+  - libapache2-mod-rpaf
   - ssl-cert
 
   modules:
@@ -26,6 +26,7 @@ ansible_role_apache:
   - expires
   - headers
   - ssl
+  - php7.4
 
   app: "{{ site.app }}"
   hostname: "{{ site.host }}"

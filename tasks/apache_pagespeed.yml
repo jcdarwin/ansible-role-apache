@@ -16,7 +16,7 @@
   tags: pagespeed
 
 - name: pagespeed | Add package
-  command: dpkg -i /tmp/mod-pagespeed-*.deb
+  command: dpkg -i /tmp/mod-pagespeed-stable_current_amd64.deb
 #  when: pagespeed_download.changed
   tags: pagespeed
 
@@ -73,12 +73,12 @@
 
 - name: Rolling back - Removing our virtualhost
   action: command a2dissite pagespeed.{{ ansible_role_apache.hostname }}.conf
-  when: result|failed
+  when: result is failed
   tags: pagespeed
 
 - name: Rolling back - Ending playbook
   action: fail msg="Pagespeed configuration file is not valid. Please check that before re-running the playbook."
-  when: result|failed
+  when: result is failed
   tags: pagespeed
 
 - name: Make sure Apache is up and running
@@ -86,6 +86,7 @@
     name=apache2
     state=restarted
   tags: apache
+
 - name: Activate our conf
   action: command a2ensite pagespeed.{{ ansible_role_apache.hostname }}.conf
   tags: pagespeed
