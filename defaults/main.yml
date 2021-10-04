@@ -20,6 +20,7 @@ ansible_role_apache:
   - libapache2-mod-php
   - libapache2-mod-rpaf
   - ssl-cert
+  - python3-certbot-apache
 
   modules:
   - rewrite
